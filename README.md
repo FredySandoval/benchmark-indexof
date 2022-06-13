@@ -20,8 +20,9 @@ I measured them using hyperfine on a fresh install of Manjaro using a CPU: AMD R
 
 # First Test - Different Languages.
 <p align="center">
-<img src="https://user-images.githubusercontent.com/45242501/173292689-ea571fb1-e53d-4a6b-a318-66b3ade73d68.png" alt="code image" width="whatever" height="500">
+<img src="https://user-images.githubusercontent.com/45242501/173308425-53aa65c7-0e56-4245-85f9-e95af4f12104.png" alt="code image" width="whatever" height="500">
 </p>
+
 Deno: The first thing we notice is that DENO is the slowest and most unstable of them, I was definetely expecting this, and I believe this is one of the reasons it never took off, even though is written in rust, was very slow and unstable on this task.
 <br/><br/>
 StreamSearch: Applications like "Busboy" and others that depend on it like "Multer", both of them depend on StreamSearch that allows searching a stream using the Boyer-Moore-Horspool algorithm.
@@ -39,14 +40,16 @@ C: This one was not a suprise, C is known for being extremly fast, but also is h
 <br/><br/>
 # Second Test - Different Node versions.
 <p align="center">
-<img src="https://user-images.githubusercontent.com/45242501/173299529-59aa0471-8df9-42e0-98fb-354270b4c18b.png" alt="code image" width="whatever" height="500">
+<img src="https://user-images.githubusercontent.com/45242501/173308756-7cafde70-7463-4e69-bdc6-64b480f2f9fc.png" alt="code image" width="whatever" height="500">
 </p>
+
 All versions performed around the same, but the latest version 18, did notably slow compared to the rest, so it may not be a good idea to upgrade to the latest version of Node, at least not yet.
 
 # Final 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/45242501/173300522-5b71402c-4efb-473a-9bee-75e004d968f8.png" alt="code image" width="whatever" height="500">
+<img src="https://user-images.githubusercontent.com/45242501/173308995-58fc6e9c-0623-40fe-a08d-34ed75649a95.png" alt="code image" width="whatever" height="500">
 </p>
+
 If I were to migrate an application to improve performance, I would definetely consider python 3.10.4 as one of my option, not just because is easy compare to Node or Go, but because is so use, the documentation is available everywere, even though the errors in the console are not friendly at all, and don't tell too much about the error itself, compare to Rust, for example which the errors in the console, tells exactly whats going on. 
 <br/><br/>
 
