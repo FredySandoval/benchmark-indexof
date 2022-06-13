@@ -63,6 +63,7 @@ npm run check
 npm run build
 npm run start
 npm run plot
+npm run plot-all
 ```
 
 (manually install any language if missing example rust)

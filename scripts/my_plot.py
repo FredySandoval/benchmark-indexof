@@ -2,6 +2,7 @@
 
 import argparse
 import json
+from bs4 import ResultSet
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -83,7 +84,10 @@ colors = [ "#ff0000", "#ef1002", "#df2004", "#cf3006", "#bf4008", "#af5009", "#9
 for i in range(len(get_labels)):
     moving_average = fn_moving_average(get_times[i], moving_average_width)
     # to get non-repetive colors use color=colormap(i / len(get_labels)
-    plt.plot(nums, moving_average, "-", color=colors[i])
+    if len(results) < 10:
+        plt.plot(nums, moving_average, color=colormap(i / len(get_labels)))
+    else:
+        plt.plot(nums, moving_average, "-", color=colors[i])
 
 
 plt.axis([0, num - 1, 0, plus_20_percente_m_o_g_m])
