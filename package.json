@@ -6,7 +6,8 @@
   "scripts": {
     "check": "sh ./check_dependencies.sh",
     "start": "sh ./run_benchmarks.sh",
-    "plot": "sh ./run_plot.sh"
+    "plot": "sh ./run_plot.sh",
+    "create": "sh ./sample_file/createfile.sh"
   },
   "repository": {
     "type": "git",
