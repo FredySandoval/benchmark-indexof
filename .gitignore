@@ -22,3 +22,7 @@ streamsearch/streamsearch_benchmarks/*
 
 sample_file/file.bin
 
+# builds
+c/indexof
+go/indexof
+rust/indexof/target/*
