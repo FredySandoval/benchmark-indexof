@@ -48,3 +48,17 @@ All versions performed around the same, but the latest version 18, did notably s
 <img src="https://user-images.githubusercontent.com/45242501/173300522-5b71402c-4efb-473a-9bee-75e004d968f8.png" alt="code image" width="whatever" height="500">
 </p>
 If I were to migrate an application to improve performance, I would definetely consider python 3.10.4 as one of my option, not just because is easy compare to Node or Go, but because is so use, the documentation is available everywere, even though the errors in the console are not friendly at all, and don't tell too much about the error itself, compare to Rust, for example which the errors in the console, tells exactly whats going on. 
+<br/><br/>
+
+# Instructions
+
+clone the repo and run:
+
+```bash
+npm run create
+npm run check
+npm run start
+npm run plot
+```
+
+(manually install any language if missing example rust)
