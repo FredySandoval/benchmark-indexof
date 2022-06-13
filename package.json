@@ -1,0 +1,22 @@
+{
+  "name": "indexof-benchmark",
+  "version": "1.0.0",
+  "description": "Benchmarks for the same task on different language",
+  "main": "index.js",
+  "scripts": {
+    "test": "test.js",
+    "check": "sh ./check_dependencies.sh",
+    "start": "sh ./run_benchmarks.sh",
+    "plot": "sh ./run_plot.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://fredy.git"
+  },
+  "keywords": [
+    "indexof",
+    "benchmark"
+  ],
+  "author": "Fredy Sandoval",
+  "license": "MIT"
+}

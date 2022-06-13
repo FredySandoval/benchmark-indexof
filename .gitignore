@@ -1,0 +1,24 @@
+# exclude everything
+c/c_benchmarks/*
+deno/deno_benchmarks/*
+go/go_benchmarks/*
+node/node_benchmarks/*
+node/all_node_benchmarks/*
+python/python_benchmarks/*
+rust/rust_benchmarks/*
+streamsearch/streamsearch_benchmarks/*
+
+# exception to the rule
+!c_benchmarks/.gitkeep 
+!deno_benchmarks/.gitkeep
+!go_benchmarks/.gitkeep
+!node_benchmarks/.gitkeep
+!all_node_benchmarks/.gitkeep
+!python_benchmarks/.gitkeep
+!rust_benchmarks/.gitkeep
+!streamsearch_benchmarks/.gitkeep
+
+# Large file
+
+sample_file/file.bin
+
