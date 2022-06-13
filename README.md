@@ -57,6 +57,7 @@ clone the repo and run:
 ```bash
 npm run create
 npm run check
+npm run build
 npm run start
 npm run plot
 ```
