@@ -4,12 +4,12 @@
   "description": "Benchmarks for the same task on different language",
   "main": "index.js",
   "scripts": {
-    "check": "sh ./check_dependencies.sh",
-    "start": "sh ./run_benchmarks.sh",
-    "plot": "sh ./run_plot.sh",
-    "plot-all": "sh ./run_plot_for_node_versions.sh",
-    "create": "sh ./sample_file/createfile.sh",
-    "build": "sh ./c/build.sh && sh ./rust/indexof/src/build.sh && sh ./go/build.sh"
+    "check": "bash ./check_dependencies.sh",
+    "start": "bash ./run_benchmarks.sh",
+    "plot": "bash ./run_plot.sh",
+    "plot-all": "bash ./run_plot_for_node_versions.sh",
+    "create": "bash ./sample_file/createfile.sh",
+    "build": "bash ./c/build.sh && sh ./rust/indexof/src/build.sh && sh ./go/build.sh"
   },
   "repository": {
     "type": "git",
