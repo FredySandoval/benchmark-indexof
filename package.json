@@ -1,15 +1,17 @@
 {
   "name": "indexof-benchmark",
-  "version": "1.0.0",
-  "description": "Benchmarks for the same task on different language",
+  "version": "2.0.0",
+  "description": "Benchmarks for the same task on different languages",
   "main": "index.js",
   "scripts": {
     "check": "bash ./check_dependencies.sh",
-    "start": "bash ./run_benchmarks.sh",
-    "plot": "bash ./run_plot.sh",
-    "plot-all": "bash ./run_plot_for_node_versions.sh",
     "create": "bash ./sample_file/createfile.sh",
-    "build": "bash ./c/build.sh && sh ./rust/indexof/src/build.sh && sh ./go/build.sh"
+    "build": "bash ./c/build.sh && bash ./rust/indexof/src/build.sh && bash ./go/build.sh",
+    "start": "bash ./run_benchmarks.sh",
+    "mem": "bash ./run_mem_benchmarks.sh",
+    "startup": "bash ./run_startup_baseline.sh",
+    "plot": "bash ./run_plot.sh",
+    "plot-all": "bash ./run_plot_for_node_versions.sh"
   },
   "repository": {
     "type": "git",

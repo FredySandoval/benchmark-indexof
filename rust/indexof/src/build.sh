@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Makes sure the script is executed from its onw current directory
+# Makes sure the script is executed from its own current directory
 cd "$(dirname "$0")"
 
-# build rust release indexof file
-cargo build --release
-sleep 1
-mv ../target/release/indexof ./
+# build both the memmem-based and the naive variant
+cargo build --release --manifest-path ../Cargo.toml
+cp ../target/release/indexof ./
+cp ../target/release/indexof_naive ./

@@ -1,9 +1,13 @@
-NODE=./nodejs/node_benchmarks/bench_node_v16.15.1.json
-PYTHON=./python/python_benchmarks/bench_Python_3.10.4.json
-GO=./go/go_benchmarks/bench_go1.18.2.json
-RUST=./rust/rust_benchmarks/bench_rustc_1.61.0.json
-DENO=./deno/deno_benchmarks/bench_deno_1.22.1.json
-STREAMSEARCH=./streamsearch/streamsearch_benchmarks/bench_streamsearch.json
-C=./c/c_benchmarks/bench_gcc12.1.0.json
+#!/bin/bash
+# Plot whatever benchmark result files exist (produced by run_benchmarks.sh).
 
-python ./scripts/my_plot.py --files $DENO $STREAMSEARCH  $RUST $NODE $GO $PYTHON $C  
+cd "$(dirname "$0")"
+
+FILES=$(find . -path ./results/archive-2022 -prune -o -name 'bench_*.json' -print | sort)
+
+if [ -z "$FILES" ]; then
+    echo "No bench_*.json files found. Run 'npm run start' first."
+    exit 1
+fi
+
+python3 ./scripts/my_plot.py --files $FILES --title "indexOf benchmark (streaming, end-to-end)" "$@"

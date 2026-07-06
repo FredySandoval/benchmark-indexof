@@ -1,18 +1,24 @@
-# exclude everything
+# benchmark results (except the archived 2022 ones)
 c/c_benchmarks/*
 deno/deno_benchmarks/*
 go/go_benchmarks/*
-node/node_benchmarks/*
-node/all_node_benchmarks/*
+nodejs/node_benchmarks/*
+nodejs/all_node_benchmarks/*
 python/python_benchmarks/*
 rust/rust_benchmarks/*
 streamsearch/streamsearch_benchmarks/*
+results/mem_results.txt
+results/startup_baseline.json
 
 # Large file
-
 sample_file/file.bin
 
 # builds
 c/indexof
 go/indexof
 rust/indexof/target/*
+rust/indexof/src/indexof
+rust/indexof/src/indexof_naive
+
+# deno lockfile (regenerated per-machine, no deno.json to anchor it)
+deno.lock

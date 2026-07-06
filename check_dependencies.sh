@@ -7,6 +7,8 @@ DEPENDENCIES=(
     "gcc"
     "python3"
     "rustc"
+    "cargo"
+    "hyperfine"
 )
 # Loop through the dependencies
 # Check if the dependencies are installed

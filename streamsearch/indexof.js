@@ -1,26 +1,30 @@
-// apps like Busboy uses this to find the index of a file in a stream
+'use strict';
+// Streaming Boyer-Moore-Horspool search (the algorithm Busboy/Multer use
+// via the streamsearch package). SBMH natively handles needles that
+// straddle chunk boundaries, so no manual overlap is needed here.
+//
+// Usage: node indexof.js [file]
+
+const path = require('path');
+const fs = require('fs');
 const StreamSearch = require('./sbmh.js'); // https://github.com/mscdex/streamsearch
 
-let fs = require('fs'),
-    reader = fs.createReadStream("../sample_file/file.bin", { highWaterMark: 65536 });
+const file = process.argv[2] || path.join(__dirname, '../sample_file/file.bin');
+const reader = fs.createReadStream(file, { highWaterMark: 65536 });
 
-var ind = 0;
-var counter = 0;
+let ind = 0;
+let chunks = 0;
 const needle = Buffer.from('--boundary--');
 const ss = new StreamSearch(needle, (isMatch, data, start, end) => {
+    ind += end;
     if (isMatch) {
-        ind += end
-        console.log('Number of chunks: ', counter);
+        console.log('Number of chunks:', chunks);
         console.log('Found index at:', ind);
-        return;
-    } else {
-        ind += end
+        reader.destroy();
     }
-    
 });
 
-reader.on('data', function (chunk) {
-    counter += 1;
+reader.on('data', (chunk) => {
+    chunks++;
     ss.push(chunk);
-
 });

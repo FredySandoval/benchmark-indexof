@@ -1,14 +1,12 @@
 #!/bin/bash
 
-# Makes sure the script is executed from its onw current directory
-# SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )";
-# echo $SCRIPT_DIR
-# cd $SCRIPT_DIR
-
-# Makes sure the script is executed from its onw current directory
+# Makes sure the script is executed from its own current directory
 cd "$(dirname "$0")"
 
-TIMES=100
-# Get the python version
-VERSION=rustc_1.61.0
-hyperfine --runs $TIMES --time-unit second "./indexof" --warmup 3 --export-json ../../rust_benchmarks/bench_$VERSION.json -n $VERSION 
+TIMES=${TIMES:-50}
+VERSION="rustc_$(rustc --version | awk '{print $2}')"
+mkdir -p ../../rust_benchmarks
+hyperfine --runs $TIMES --time-unit second "./indexof" --warmup 3 \
+    --export-json ../../rust_benchmarks/bench_$VERSION.json -n "$VERSION"
+hyperfine --runs $TIMES --time-unit second "./indexof_naive" --warmup 3 \
+    --export-json ../../rust_benchmarks/bench_${VERSION}_naive.json -n "${VERSION}_naive"

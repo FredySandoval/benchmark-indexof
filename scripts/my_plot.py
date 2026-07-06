@@ -2,7 +2,6 @@
 
 import argparse
 import json
-from bs4 import ResultSet
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -79,7 +78,8 @@ moving_average_width = (
 if moving_average_width < 1: # if moving_average_width == 0: will cause error
     moving_average_width = 1
     
-colormap = plt.cm.nipy_spectral 
+plt.figure(figsize=(12, 5.5))
+colormap = plt.cm.nipy_spectral
 colors = [ "#ff0000", "#ef1002", "#df2004", "#cf3006", "#bf4008", "#af5009", "#9f600b", "#8f700d", "#80800f", "#708f11", "#609f13", "#50af15", "#40bf17", "#30cf18", "#20df1a", "#10ef1c", "#00ff1e"]
 for i in range(len(get_labels)):
     moving_average = fn_moving_average(get_times[i], moving_average_width)
@@ -91,7 +91,10 @@ for i in range(len(get_labels)):
 
 
 plt.axis([0, num - 1, 0, plus_20_percente_m_o_g_m])
-plt.legend(labels=get_labels, loc="right", fontsize="medium", ncol=1)
+# legend outside the axes, to the right of the chart
+plt.legend(labels=get_labels, loc="center left", bbox_to_anchor=(1.02, 0.5),
+           fontsize="medium", ncol=1, frameon=False)
+plt.tight_layout()
 
 plt.ylabel("Time in Seconds")
 plt.xlabel("Number of Runs")
@@ -100,6 +103,6 @@ if args.title:
     plt.title(args.title)
 
 if args.output:
-    plt.savefig(args.output)
+    plt.savefig(args.output, bbox_inches="tight", dpi=150)
 else:
     plt.show()

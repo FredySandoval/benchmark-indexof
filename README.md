@@ -1,69 +1,93 @@
 # benchmark-indexof
-## benchmarks of the same node task in different languages
-<p align="center">
-<img src="https://user-images.githubusercontent.com/45242501/173290738-2b855a27-176d-4452-ae02-0fde0cbc6efa.png" alt="code image" width="whatever" height="500">
-</p>
 
-### Questions:
+Benchmarks of the same task — finding a byte pattern (`--boundary--`) in a large binary file — implemented in Node.js, Deno, Python, Go, Rust, and C, plus Node's [streamsearch](https://github.com/mscdex/streamsearch) (the streaming Boyer-Moore-Horspool search used by Busboy/Multer).
+
+### Questions
 1. Is the same function or action faster in other languages?
-2. Is it worth it to migrate my application to a different languate to improve speed?
+2. Is it worth migrating an application to a different language to improve speed?
 
-Many packages like "Busboy" for example relies on searching a pattern on a buffer. In this repo I try to measure the same task under the same circumstances to see the differences in speed ans stabilify of the different languages.
-### Constrains:
-- The buffer size in all languages is 65536 bytes which is the default for NodeJS
-- The file in which all languages looked was the same, and in this case is a 10GB with random binaries. 
-- The string to be searched is the word "--boundary--" which is at the very end.
-- All Languages were measured 100 times, 
 
-In this first case, I tested the same application on NODEJS, NODEJS using StreamSearch, DENO, PYTHON 3, GO, RUST, C
-I measured them using hyperfine on a fresh install of Manjaro using a CPU: AMD Ryzen 9 5950X (32) @ 3.400GHz, while no other program was running in the background.
+## The current benchmark
 
-# First Test - Different Languages.
-<p align="center">
-<img src="https://user-images.githubusercontent.com/45242501/173308425-53aa65c7-0e56-4245-85f9-e95af4f12104.png" alt="code image" width="whatever" height="500">
-</p>
+All implementations solve the **same problem**: stream the file in 64KiB chunks, search each chunk with the language's idiomatic optimized substring search, and handle needles that straddle chunk boundaries (by carrying over the last `needle_len - 1` bytes).
 
-Deno: The first thing we notice is that DENO is the slowest and most unstable of them, I was definetely expecting this, and I believe this is one of the reasons it never took off, even though is written in rust, was very slow and unstable on this task.
-<br/><br/>
-StreamSearch: Applications like "Busboy" and others that depend on it like "Multer", both of them depend on StreamSearch that allows searching a stream using the Boyer-Moore-Horspool algorithm.
-<br/><br/>
-Rust: I always hear about how fast Rust is, but on this particular task was not particularly good, not to mention that was hard to write, and very unstable compare to the rest.
-<br/><br/>
-Node: The level of optimization that Node has, the large amount of documentation and how easy is to program, makes it the most used.
-<br/><br/>
-Go: On this particular case Go was superior to Rust, and was way more easy to write, well... compare with rust.
-<br/><br/>
-Python3: This result was a big surprise, but the level of optimization that python is receiving makes it one of the most used in the world.
-<br/><br/>
-C: This one was not a suprise, C is known for being extremly fast, but also is hard to write, and I wouldn't recommend to migrate to C due to this reason only.
+| Language | Search used |
+|---|---|
+| C | glibc `memmem`, built with `-O2` |
+| Rust | `memchr::memmem` (idiomatic) — plus `indexof_naive`, the original naive search kept to show the algorithm-vs-language effect |
+| Go | `bytes.Index` |
+| Node.js | `Buffer.indexOf` |
+| Deno | `@std/bytes` `indexOfNeedle` (Deno 2.x APIs) |
+| Python 3 | `bytes.find` |
+| streamsearch | streaming Boyer-Moore-Horspool (SBMH) |
 
-<br/><br/>
-# Second Test - Different Node versions.
-<p align="center">
-<img src="https://user-images.githubusercontent.com/45242501/173308756-7cafde70-7463-4e69-bdc6-64b480f2f9fc.png" alt="code image" width="whatever" height="500">
-</p>
+Two measurement modes:
 
-All versions performed around the same, but the latest version 18, did notably slow compared to the rest, so it may not be a good idea to upgrade to the latest version of Node, at least not yet.
+1. **End-to-end streaming** (`npm run start`) — hyperfine times the whole process, 50 runs, 3 warmups. This answers "how fast is the whole job", but note it is largely memory-bandwidth-bound once the file is in page cache, and includes runtime startup (measure that separately with `npm run startup`).
+2. **In-memory search** (`npm run mem`) — each implementation loads the first 256MiB into memory and times only the search (10 repetitions, timed in-language). This isolates the actual substring-search cost and answers question 1 directly, reporting GiB/s throughput.
 
-# Final 
-<p align="center">
-<img src="https://user-images.githubusercontent.com/45242501/173308995-58fc6e9c-0623-40fe-a08d-34ed75649a95.png" alt="code image" width="whatever" height="500">
-</p>
+### Constraints
+- Chunk size is 65536 bytes (Node's default `highWaterMark`).
+- The file is random bytes with `--boundary--` appended near the end, so every implementation must scan the whole file (worst case). Default size is **1GB** (set `FILE_SIZE=10G` before `npm run create` to reproduce the original 10GB setup).
+- Toolchain versions are detected at runtime and recorded in the result filenames — nothing is hardcoded.
 
-If I were to migrate an application to improve performance, I would definetely consider python 3.10.4 as one of my option, not just because is easy compare to Node or Go, but because is so use, the documentation is available everywere, even though the errors in the console are not friendly at all, and don't tell too much about the error itself, compare to Rust, for example which the errors in the console, tells exactly whats going on. 
-<br/><br/>
+## Instructions
 
-# Instructions
-
-clone the repo and run:
+Requires: `node`, `deno` (2.x), `go`, `rustc`/`cargo`, `gcc`, `python3`, `hyperfine`, and Python `matplotlib`+`numpy` for plotting.
 
 ```bash
-npm run create
-npm run check
-npm run build
-npm run start
-npm run plot
-npm run plot-all
+npm run create    # generate sample_file/file.bin (FILE_SIZE=10G to make it bigger)
+npm run check     # verify toolchains are installed
+npm run build     # build the C, Rust and Go binaries
+npm run start     # end-to-end streaming benchmark (hyperfine)
+npm run mem       # in-memory search benchmark (isolates search cost)
+npm run startup   # runtime startup baseline (node/deno/python no-op)
+npm run plot      # plot whatever results exist
+npm run plot-all  # plot results across Node versions (requires fnm)
 ```
 
-(manually install any language if missing example rust)
+Set `TIMES=N` to change the number of hyperfine runs (default 50).
+
+## Results (July, 2026)
+
+Measured 2026-07-06 on AMD Ryzen 9 5950X, Arch Linux, 1GB file, 50 runs, warm page cache.
+Faster is better — **top = better, lower = worse**.
+
+### End-to-end streaming (mean time, hyperfine)
+
+```
+rustc 1.96 (memmem)      ▏███ 0.083 s        ← fastest
+c gcc 16.1 (-O2)         ▏█████ 0.145 s
+python 3.14.5            ▏███████████ 0.339 s
+go 1.26.4                ▏██████████████ 0.409 s
+rustc 1.96 (naive 2022)  ▏██████████████████████ 0.659 s
+streamsearch (node 26)   ▏█████████████████████████ 0.740 s
+node 26.1.0              ▏█████████████████████████ 0.762 s
+deno 2.7.14              ▏██████████████████████████████████████ 1.137 s   ← slowest
+```
+
+<p align="center">
+<img src="results/plot-2026.png" alt="2026 benchmark results: per-run times, all languages" width="900">
+</p>
+
+The naive-Rust bar is the key exhibit: the same language with hand-rolled search is **8× slower** than idiomatic Rust (`memchr::memmem`) —  "Rust is slow..." conclusion was the algorithm, not the language.
+
+### In-memory search throughput (256MiB, search cost only)
+
+```
+c (glibc memmem)         ▏████████████████████████████████████████ 108.8 GiB/s
+rust (memchr::memmem)    ▏████████ 21.4 GiB/s
+go (bytes.Index)         ▏████ 10.6 GiB/s
+python (bytes.find)      ▏██ 4.4 GiB/s
+node (Buffer.indexOf)    ▏█ 3.9 GiB/s
+deno (@std/bytes, JS)    ▏▏0.73 GiB/s
+```
+
+Runtime startup baseline (no-op process): node 17ms, python 21ms, deno 33ms.
+
+## Reading the results
+
+- Expect the **end-to-end** numbers to cluster: with a warm page cache the job is bound by memory bandwidth plus per-chunk overhead, not by language speed.
+- The **in-memory** numbers are where languages actually differ — and mostly they reflect which substring-search algorithm the standard library ships, since all the fast ones (glibc `memmem`, `memchr`, `bytes.Index`, `bytes.find`, `Buffer.indexOf`) are compiled, vectorized code.
+- Compare `rustc_*` vs `rustc_*_naive` to see how much the algorithm choice matters — this single difference explains the 2022 "Rust is slow" result.
+- streamsearch pays extra to be *correct on streams* (matches spanning chunks) and to report match positions incrementally; that's the price Busboy/Multer pay.

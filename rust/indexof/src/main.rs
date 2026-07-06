@@ -1,46 +1,93 @@
-use std::{
-    fs::File,
-    io::{self, BufRead, BufReader},
-};
+// Streaming search for a needle in a file, 64KiB chunks, using the
+// `memchr` crate's memmem (the idiomatic optimized substring search in
+// Rust — the same class of algorithm as glibc's memmem used by the C
+// version). See src/bin/indexof_naive.rs for the original naive search
+// kept for comparison.
+//
+// Handles needles that straddle chunk boundaries by carrying over the
+// last (needle.len() - 1) bytes of each chunk.
+//
+// Usage: ./indexof [--mem] [file]
+//   --mem: load the first 256MiB into memory and time the search alone
+//          (isolates the search cost from I/O and process startup).
 
-fn find_subsequence(haystack: &[u8], needle: &[u8]) -> Option<usize> {
-    haystack.windows( needle.len()).position(|window | window == needle)
+use memchr::memmem::Finder;
+use std::fs::File;
+use std::io::{self, Read};
+use std::time::Instant;
+
+const NEEDLE: &[u8] = b"--boundary--";
+const CHUNK: usize = 65536;
+const MEM_BYTES: u64 = 256 * 1024 * 1024;
+const MEM_RUNS: u32 = 10;
+
+fn mem_bench(mut file: File) -> io::Result<()> {
+    let size = file.metadata()?.len().min(MEM_BYTES) as usize;
+    let mut data = vec![0u8; size];
+    file.read_exact(&mut data)?;
+
+    let finder = Finder::new(NEEDLE);
+    let mut found: i64 = -1;
+    let start = Instant::now();
+    for _ in 0..MEM_RUNS {
+        found = finder.find(&data).map_or(-1, |i| i as i64);
+    }
+    let avg = start.elapsed().as_secs_f64() / MEM_RUNS as f64;
+
+    let gibs = size as f64 / avg / (1u64 << 30) as f64;
+    println!(
+        "mem-search bytes={} runs={} avg_ms={:.2} throughput_gib_s={:.2} index={}",
+        size,
+        MEM_RUNS,
+        avg * 1000.0,
+        gibs,
+        found
+    );
+    Ok(())
+}
+
+fn stream_bench(mut file: File) -> io::Result<()> {
+    let finder = Finder::new(NEEDLE);
+    let overlap = NEEDLE.len() - 1;
+    let mut buf = vec![0u8; overlap + CHUNK];
+    let mut tail = 0usize; // carried-over bytes at the start of buf
+    let mut offset = 0u64; // global index of buf[0]
+    let mut chunks = 0u64;
+
+    loop {
+        let n = file.read(&mut buf[tail..tail + CHUNK])?;
+        if n == 0 {
+            return Ok(());
+        }
+        chunks += 1;
+        let total = tail + n;
+        if let Some(i) = finder.find(&buf[..total]) {
+            println!("Number of chunks: {}", chunks);
+            println!("Found index at: {}", offset + i as u64);
+            return Ok(());
+        }
+        let keep = overlap.min(total);
+        buf.copy_within(total - keep..total, 0);
+        offset += (total - keep) as u64;
+        tail = keep;
+    }
 }
 
 fn main() -> io::Result<()> {
-    const CAP: usize = 65536;
-    let file = File::open("../../../sample_file/file.bin")?;
-    let mut reader = BufReader::with_capacity(CAP, file);
-
-    let needle: &[u8] = &[45, 45, 98, 111, 117, 110, 100, 97, 114, 121, 45, 45];
-
-
-    let mut ind: usize = 0;
-    let mut count: i32 = 0;
-    
-    loop {
-        let length = {
-            let buffer = reader.fill_buf()?;
-            // do stuff with buffer here
-            match find_subsequence(&buffer, &needle) {
-                Some(index) => {
-                    count += 1;
-                    ind += index;
-                    println!("Number of chunks {:?}", count);
-                    println!("Found index {:?}.", ind);
-                }
-                None => {
-                    count += 1;
-                    ind += buffer.len();
-                },
-            }
-            buffer.len()
-        };
-        if length == 0 {
-            break;
+    let mut mem_mode = false;
+    let mut path = String::from("../../../sample_file/file.bin");
+    for arg in std::env::args().skip(1) {
+        if arg == "--mem" {
+            mem_mode = true;
+        } else {
+            path = arg;
         }
-        reader.consume(length);
     }
 
-    Ok(())
+    let file = File::open(&path)?;
+    if mem_mode {
+        mem_bench(file)
+    } else {
+        stream_bench(file)
+    }
 }
